@@ -1,0 +1,22 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t chankeen/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run chankeen/react-test npm test -- 
+
+after_success:
+  - docker build -t chankeen/multi-client ./client
+  - docker build -t chankeen/multi-nginx ./nginx
+  - docker build -t chankeen/multi-server ./server
+  - docker build -t chankeen/multi-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push chankeen/multi-client
+  - docker push chankeen/multi-nginx
+  - docker push chankeen/multi-server
+  - docker push chankeen/multi-worker
+
+
